@@ -47,7 +47,7 @@ def run_job():
         step_adjust_temp=10,
         step_equilibrium=20,
         show_progress=False,
-        show_summary=True,
+        show_summary=False,
     )
 
     if data['system'] == 'LJ':
@@ -64,4 +64,4 @@ def run_job():
     return json.dumps({'output': system.reporter.traj}, cls=NumpyEncoder)
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True, use_reloader=False)
+    app.run(port=5000)
