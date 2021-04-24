@@ -4,7 +4,7 @@ import json
 
 class Reporter:
 
-    def __init__(self, parent, step_report_avg, model, output_file):
+    def __init__(self, parent, step_report_avg, model, output_file=None):
         self.system = parent
         self.step_report_avg = step_report_avg
         self.model = model

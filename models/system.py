@@ -45,7 +45,7 @@ class System():
         self.step_count = 0
 
     """ adding a reporter to the system """
-    def add_reporter(self, reporter, step_report_avg, model, output_file):
+    def add_reporter(self, reporter, step_report_avg, model, output_file=None):
         self.report = True
         self.reporter = reporter(self, step_report_avg, model, output_file)
 

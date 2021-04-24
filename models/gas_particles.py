@@ -38,5 +38,6 @@ class gas_particles(System):
             if self.report: self.reporter.step()
 
             if (self.step_count >= self.step_limit):
-                if self.report: self.reporter.export()
+                # for the backend we just request this array in the API call
+                # if self.report: self.reporter.export()
                 running = False
