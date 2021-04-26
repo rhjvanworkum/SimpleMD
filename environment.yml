@@ -1,4 +1,0 @@
-name: simple-md
-dependencies:
-  - flask
-  - numpy
