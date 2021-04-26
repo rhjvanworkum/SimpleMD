@@ -98,12 +98,10 @@ def predictor_step(delta_t, n_mol, mol):
     wv = delta_t / div
 
     for n in range(n_mol):
-        mol[n].ro = mol[n].r
-        mol[n].rvo = mol[n].rv
+        mol[n].ro = mol[n].r.copy()
+        mol[n].rvo = mol[n].rv.copy()
         for i in range(len(mol[0].r)):
-            # mol[n].r[i] = mol[n].r[i] + delta_t * mol[n].rv[i] + wr * (cr[0] * mol[n].ra[i] + cr[1] * mol[n].ra1[i] + cr[2] * mol[n].ra2[i])
             pr4(mol[n], delta_t, wr, cr, i)
-            # mol[n].rv[i] = (mol[n].r[i] - mol[n].ro[i]) / delta_t + wv * (cv[0] * mol[n].ra[i] + cv[1] * mol[n].ra1[i] + cv[2] * mol[n].ra2[i])
             pv4(mol[n], delta_t, wv, cv, i)
         mol[n].ra2 = mol[n].ra1
         mol[n].ra1 = mol[n].ra
@@ -118,11 +116,7 @@ def corrector_step(delta_t, n_mol, mol):
     for n in range(n_mol):
         for t in range(len(mol[0].r)):
             cr4(mol[n], delta_t, wr, cr, t)
-            # mol[n].r[t] = mol[n].ro[t] + delta_t * mol[n].rvo[t] + wr * (
-            #             cr[0] * mol[n].ra[t] + cr[1] * mol[n].ra1[t] + cr[2] * mol[n].ra2[t])
             cv4(mol[n], delta_t, wv, cv, t)
-            # mol[n].rv[t] = (mol[n].r[t] - mol[n].ro[t]) / delta_t + wv * (
-            #             cv[0] * mol[n].ra[t] + cv[1] * mol[n].ra1[t] + cv[2] * mol[n].ra2[t])
 
 def predictor_stepQ(delta_t, n_mol, mol):
     cr = np.array([19, -10, 3])
@@ -132,8 +126,8 @@ def predictor_stepQ(delta_t, n_mol, mol):
     wv = delta_t / div
 
     for n in range(n_mol):
-        mol[n].qo = mol[n].q
-        mol[n].qvo = mol[n].qv
+        mol[n].qo = mol[n].q.copy()
+        mol[n].qvo = mol[n].qv.copy()
         for t in range(len(mol[0].r)):
             prq4(mol[n], delta_t, wr, cr, t)
             pvq4(mol[n], delta_t, wv, cv, t)

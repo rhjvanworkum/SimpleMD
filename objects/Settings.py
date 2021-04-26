@@ -1,3 +1,7 @@
+"""
+Settings object
+"""
+
 class Settings():
     def __init__(self, N=5, density=0.9, temperature=1, delta_t=0.005, step_limit=10000, step_avg=100,
                  step_adjust_temp=10, step_equilibrium=20, show_progress=False, show_summary=True):

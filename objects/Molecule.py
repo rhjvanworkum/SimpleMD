@@ -1,5 +1,15 @@
+"""
+Molecule Class Object - used for the TIP-4P model
+
+Includes:
+- Site class
+- Molecular Site class
+- functions to compute angular velocities, accelerations and torques
+"""
+
 import numpy as np
 from utils import Qproduct, Mproduct, build_rot_matrix, lenSquared
+
 
 class Molecule():
     def __init__(self, idx):
@@ -26,15 +36,18 @@ class Molecule():
         self.m_inert = np.zeros(3)
         self.torq = np.zeros(3)
 
+
 class Site():
     def __init__(self):
         self.f = np.zeros(3)
         self.r = np.zeros(3)
 
+
 class MSite():
     def __init__(self):
         self.r = np.zeros(3)
         self.typeF = 0
+
 
 def compute_ang_vel(mol):
     qvt = mol.qv
@@ -45,6 +58,7 @@ def compute_ang_vel(mol):
     qt = 2.0 * Qproduct(qvt, mol.q)
     # put the angular velocities in a 3D vector
     return np.array([qt[0], qt[1], qt[2]])
+
 
 def compute_accels_q(mol):
     w = compute_ang_vel(mol)
@@ -58,6 +72,7 @@ def compute_accels_q(mol):
     # computing the quaternion accelerations
     # qa = 0.5 * W.T * (w_dot_x, w_dot_y, w_dot_z, -2 sum (q_dot_m^2))
     mol.qa = Qproduct(mol.q, qs) * 0.5
+
 
 def compute_torq(mol, sites):
     mol.ra = np.zeros(3)

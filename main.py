@@ -6,6 +6,7 @@ from reporter import Reporter
 
 from integrators.LeapFrogIntegrator import LeapFrogIntegrator
 from integrators.VerletVelocityIntegrator import VerletVelocityIntegrator
+from integrators.PredictorCorrectorIntegrator import PredictorCorrectorIntegrator
 
 from interaction_methods.pair_by_pair import ComputeForcesPBP
 from interaction_methods.cell_division import ComputeForcesCD
@@ -23,7 +24,13 @@ system_dict = {
 
 integrator_dict = {
     'leapfrog': LeapFrogIntegrator,
-    'verlet': VerletVelocityIntegrator
+    'verlet': VerletVelocityIntegrator,
+    'pred-corr': PredictorCorrectorIntegrator
+}
+
+forces_dict = {
+    'PBP': ComputeForcesPBP,
+    'CD': ComputeForcesCD
 }
 
 class NumpyEncoder(json.JSONEncoder):
@@ -37,12 +44,14 @@ def run_job():
 
     data = request.json
 
+    print(data)
+
     settings = Settings(
         N=data['N'],
         density=data['density'],
         temperature=data['temperature'],
         delta_t=data['delta_t'],
-        step_limit=['steps'],
+        step_limit=data['steps'],
         step_avg=100,
         step_adjust_temp=10,
         step_equilibrium=20,
@@ -51,9 +60,9 @@ def run_job():
     )
 
     if data['system'] == 'LJ':
-        system = system_dict[data['system']](settings, integrator_dict[data['integrator']], ComputeForcesCD)
+        system = system_dict[data['system']](settings, integrator_dict[data['integrator']], forces_dict[data['forces']])
     else:
-        system = system_dict[data['system']](settings, integrator_dict[data['integrator']], ComputeForcesPBP)
+        system = system_dict[data['system']](settings, integrator_dict[data['integrator']], forces_dict[data['forces']])
 
     # add reporter
     system.add_reporter(Reporter, 1, data['system'])

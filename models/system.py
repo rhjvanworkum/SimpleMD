@@ -1,3 +1,7 @@
+"""
+Basic system class
+"""
+
 import numpy as np
 import random
 import utils as utils
@@ -62,8 +66,9 @@ class System():
                     position *= self.cell_size
                     # center the position around the origin (0, 0, 0)
                     position -= 0.5 * self.region
-                    self.mol[i].x = position
+                    self.mol[i].r = position
                     i += 1
+
 
     """ Initiating cartesian velocities """
     def init_vels(self):
@@ -74,6 +79,7 @@ class System():
             vSum += self.mol[i].rv
         for i in range(self.n_mol):
             self.mol[i].rv -= (vSum / self.n_mol)
+
 
     """ Initiating quaternion positions """
     def init_ang_coords(self):
