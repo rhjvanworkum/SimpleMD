@@ -13,7 +13,7 @@ def wrap_around_cell(cell, cells, region, shift):
 def ComputeForcesCD(system):
     rr_cut = system.r_cut ** 2
     # number of cells with length r_cut that fit inside region
-    cells = np.ceil(system.region / system.r_cut).astype(int)
+    cells = np.floor(system.region / system.r_cut).astype(int)
 
     # initializing a dictionary that contains all particles index inside each cell
     cell_dict = {}
