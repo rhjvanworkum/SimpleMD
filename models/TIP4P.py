@@ -1,9 +1,14 @@
+"""
+TIP-4P water model
+"""
+
 import numpy as np
 
 from models.system import System
 import utils as utils
 import integrators.thermostats as thermostat
 from objects.Molecule import Molecule, Site, MSite
+
 
 class TIP4P(System):
 
@@ -78,5 +83,6 @@ class TIP4P(System):
             if self.report: self.reporter.step()
 
             if (self.step_count >= self.step_limit):
-                if self.report: self.reporter.export()
+                # for the backend we just request this array in the API call
+                if self.report and self.reporter.output_file: self.reporter.export()
                 running = False

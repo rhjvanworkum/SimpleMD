@@ -1,5 +1,9 @@
+"""
+Simple Lennard-Jones soft fluid disk model
+"""
+
 from models.system import System
-from objects.Molecule import Molecule
+from objects.Particle import Particle
 import integrators.thermostats as thermostat
 
 class gas_particles(System):
@@ -7,7 +11,7 @@ class gas_particles(System):
     def __init__(self, settings, integrator, forces):
         System.__init__(self, settings, integrator, forces)
 
-        self.mol = [Molecule(i) for i in range(self.n_mol)]
+        self.mol = [Particle(i) for i in range(self.n_mol)]
 
         self.init_coords()
         self.init_vels()
@@ -38,5 +42,6 @@ class gas_particles(System):
             if self.report: self.reporter.step()
 
             if (self.step_count >= self.step_limit):
-                if self.report: self.reporter.export()
+                # for the backend we just request this array in the API call
+                if self.report and self.reporter.output_file: self.reporter.export()
                 running = False

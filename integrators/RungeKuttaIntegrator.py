@@ -1,3 +1,7 @@
+"""
+Currently not used
+"""
+
 from interaction_methods.pair_by_pair import ComputeForcesPBP_RK
 from integrators.thermostats import apply_thermostat
 import numpy as np

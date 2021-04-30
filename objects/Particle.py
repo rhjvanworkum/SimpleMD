@@ -1,3 +1,7 @@
+"""
+Simple Particle Class used for the Lennard-Jones model
+"""
+
 import numpy as np
 
 class Particle():
