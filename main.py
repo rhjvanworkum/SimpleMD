@@ -44,8 +44,6 @@ def run_job():
 
     data = request.json
 
-    print(data)
-
     settings = Settings(
         N=data['N'],
         density=data['density'],
