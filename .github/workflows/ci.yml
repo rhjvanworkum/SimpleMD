@@ -27,14 +27,17 @@ jobs:
       - name: Install dependencies
         run: uv sync --extra web --python ${{ matrix.python-version }}
 
+      # --no-sync: reuse the environment synced above (with the `web` extra).
+      # Without it, `uv run` re-syncs to the default dependencies and drops flask,
+      # breaking the web tests.
       - name: Lint (ruff)
-        run: uv run ruff check .
+        run: uv run --no-sync ruff check .
 
       - name: Format check (ruff)
-        run: uv run ruff format --check .
+        run: uv run --no-sync ruff format --check .
 
       - name: Type check (mypy)
-        run: uv run mypy
+        run: uv run --no-sync mypy
 
       - name: Tests
-        run: uv run pytest --cov=simplemd --cov-report=term-missing
+        run: uv run --no-sync pytest --cov=simplemd --cov-report=term-missing
