@@ -1,8 +1,15 @@
+"""Leapfrog time integrator."""
+
 from simplemd.integrators.thermostats import apply_thermostat, apply_thermostat_nonlinear
 from simplemd.particles.molecule import compute_accels_q, compute_torq
 
 
 class LeapFrogIntegrator:
+    """Leapfrog integration.
+
+    ``integrate`` handles point particles; ``integrate_nonlinear`` handles rigid bodies.
+    """
+
     def __init__(self, parent, delta_t):
         self.system = parent
         self.delta_t = delta_t

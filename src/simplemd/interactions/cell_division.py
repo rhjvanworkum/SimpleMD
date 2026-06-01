@@ -1,7 +1,19 @@
+"""Cell-division (cell-list) force evaluation.
+
+Bins particles into a grid of cells of side ~``r_cut`` so that only neighbouring
+cells need to be checked, in principle giving O(N) scaling.
+
+.. warning::
+   This routine has a pre-existing cell-indexing bug (edge particles map to an
+   out-of-range cell) and currently raises ``KeyError``. See
+   ``tests/test_known_bugs.py``. It is kept for reference / future fixing.
+"""
+
 import numpy as np
 
 
 def wrap_around_cell(cell, cells, region, shift):
+    """Wrap a cell index across the periodic boundary, recording the image shift."""
     for i in range(len(cells)):
         if cell[i] >= cells[i]:
             cell[i] = 0
@@ -12,6 +24,7 @@ def wrap_around_cell(cell, cells, region, shift):
 
 
 def ComputeForcesCD(system):
+    """Lennard-Jones forces via a cell list (see module-level warning)."""
     rr_cut = system.r_cut**2
     # number of cells with length r_cut that fit inside region
     cells = np.floor(system.region / system.r_cut).astype(int)

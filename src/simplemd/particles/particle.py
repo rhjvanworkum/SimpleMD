@@ -1,11 +1,11 @@
-"""
-Simple Particle Class used for the Lennard-Jones model
-"""
+"""Point-particle data class for the Lennard-Jones model."""
 
 import numpy as np
 
 
 class Particle:
+    """A single point particle: position ``r``, velocity ``rv``, acceleration ``ra``."""
+
     def __init__(self, idx):
         self.idx = idx
 

@@ -1,9 +1,17 @@
+"""Trajectory recorder."""
+
 import json
 
 import numpy as np
 
 
 class Reporter:
+    """Records body positions into a trajectory array every ``step_report_avg`` steps.
+
+    For ``"LJ"`` it stores one position per molecule; for ``"TIP4P"`` it stores
+    the (non-massless) site positions. ``export`` writes the trajectory to JSON.
+    """
+
     def __init__(self, parent, step_report_avg, model, output_file=None):
         self.system = parent
         self.step_report_avg = step_report_avg

@@ -1,11 +1,20 @@
+"""Small vector, quaternion and property-accumulation helpers.
+
+Note: ``get_magnitude`` returns the *squared* magnitude (sum of squares), which
+is what the force/energy routines use directly; the name is kept for backward
+compatibility.
+"""
+
 import numpy as np
 
 
 def lenSquared(quat):
+    """Return the squared length of a 4-component quaternion."""
     return (quat[0]) ** 2 + (quat[1]) ** 2 + (quat[2]) ** 2 + (quat[3]) ** 2
 
 
 def get_magnitude(vec):
+    """Return the squared magnitude (sum of squares) of ``vec``."""
     mag = 0
     ndim = len(vec)
     for i in range(ndim):
@@ -14,6 +23,11 @@ def get_magnitude(vec):
 
 
 def get_dot_product(vec1, vec2):
+    """Return the dot product of two equal-length vectors.
+
+    Raises:
+        ValueError: if the vectors have different dimensions.
+    """
     mag = 0
     if len(vec1) != len(vec2):
         raise ValueError("vectors you are trying to dot product do not have the same dim")
@@ -25,6 +39,7 @@ def get_dot_product(vec1, vec2):
 
 
 def Qproduct(q1, q2):
+    """Quaternion product ``q1 * q2`` (returns a 4-vector)."""
     return np.array(
         [
             q1[3] * q2[0] - q1[2] * q2[1] + q1[1] * q2[2] + q1[0] * q2[3],
@@ -36,6 +51,7 @@ def Qproduct(q1, q2):
 
 
 def Mproduct(m, v):
+    """Multiply a flat 3x3 rotation matrix ``m`` (length 9) by 3-vector ``v``."""
     return np.array(
         [
             m[0] * v[0] + m[3] * v[1] + m[6] * v[2],
@@ -46,6 +62,10 @@ def Mproduct(m, v):
 
 
 def build_rot_matrix(q, transpose):
+    """Build a flat 3x3 rotation matrix from quaternion ``q``.
+
+    When ``transpose`` is truthy the transposed (inverse) rotation is returned.
+    """
     rMat = np.zeros(9)
     p = np.zeros(10)
     k = 0
@@ -71,6 +91,7 @@ def build_rot_matrix(q, transpose):
 
 
 def euler_to_quat(angle):
+    """Convert Euler angles ``(phi, theta, psi)`` to a unit quaternion."""
     a1 = 0.5 * angle[1]
     a2 = 0.5 * (angle[0] - angle[2])
     a3 = 0.5 * (angle[0] + angle[2])
@@ -85,21 +106,25 @@ def euler_to_quat(angle):
 
 
 def set_prop_zero(v):
+    """Reset the running-sum and sum-of-squares slots of a property triple."""
     v[1] = 0
     v[2] = 0
 
 
 def accum_prop(v):
+    """Accumulate the current value ``v[0]`` into the sum/sum-of-squares slots."""
     v[1] += v[0]
     v[2] += v[0] ** 2
 
 
 def avg_prop(v, n):
+    """Finalise a property triple into mean (``v[1]``) and std-dev (``v[2]``)."""
     v[1] /= n
     v[2] = np.sqrt(max(v[2] / n - v[1] ** 2, 0))
 
 
 def wrap_around(vec, region, nDim):
+    """Wrap ``vec`` into the primary periodic image of a box of size ``region``."""
     for i in range(nDim):
         if vec[i] >= 0.5 * region[i]:
             vec[i] -= region[i]
@@ -108,6 +133,7 @@ def wrap_around(vec, region, nDim):
 
 
 def shift_around(vec, region, shift, nDim):
+    """Accumulate into ``shift`` the periodic-image offset needed to wrap ``vec``."""
     for i in range(nDim):
         if vec[i] >= 0.5 * region[i]:
             shift[i] -= region[i]

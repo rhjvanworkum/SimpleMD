@@ -5,6 +5,8 @@ from simplemd.utils import get_magnitude
 
 
 def apply_thermostat(delta_t, n_mol, mol):
+    """Gaussian isokinetic constraint: remove the component of acceleration that
+    would change the translational kinetic energy (point-particle version)."""
     s1 = 0
     s2 = 0
 
@@ -21,6 +23,7 @@ def apply_thermostat(delta_t, n_mol, mol):
 
 
 def apply_thermostat_nonlinear(delta_t, n_mol, mol):
+    """Isokinetic constraint including rotational degrees of freedom (rigid bodies)."""
     s1 = 0
     s2 = 0
 
@@ -56,6 +59,7 @@ def adjust_temp(system):
 
 
 def adjust_temp_nonlin(system):
+    """Rescale translational and rotational velocities back to the target temperature."""
     # caculate the ratio between the initial and current velocities
     vvSum = 0
     for i in range(system.n_mol):

@@ -13,9 +13,7 @@ def test_cli_runs_and_reports(capsys):
 
 def test_cli_writes_output_file(tmp_path):
     out = tmp_path / "traj.json"
-    exit_code = main(
-        ["--system", "LJ", "-N", "3", "--steps", "5", "--seed", "0", "-o", str(out)]
-    )
+    exit_code = main(["--system", "LJ", "-N", "3", "--steps", "5", "--seed", "0", "-o", str(out)])
     assert exit_code == 0
     assert out.exists()
     data = json.loads(out.read_text())

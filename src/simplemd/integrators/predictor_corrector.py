@@ -1,18 +1,20 @@
+"""Gear predictor-corrector integrator (4th-order history).
+
+Note: ``integrate`` (the translational-only path) relies on the higher-order
+history buffers ``ra1``/``ra2``/``ro``/``rvo`` which only the ``Molecule`` class
+provides, so it does not work with the point-particle Lennard-Jones model. The
+``integrate_nonlinear`` path is used by the TIP-4P model.
+"""
+
 import numpy as np
 
 from simplemd.integrators.thermostats import apply_thermostat, apply_thermostat_nonlinear
 from simplemd.particles.molecule import compute_accels_q, compute_torq
 
 
-def printer(mol):
-    # print('summary:')
-    # for i in range(len(mol)):
-    #     print(mol[i].r)
-    #     print(mol[i].rv)
-    print("\n")
-
-
 class PredictorCorrectorIntegrator:
+    """Predictor-corrector time integration for translational + rotational DOFs."""
+
     def __init__(self, parent, delta_t):
         self.system = parent
         self.delta_t = delta_t

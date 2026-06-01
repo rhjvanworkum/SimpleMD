@@ -1,9 +1,13 @@
+"""Velocity-Verlet time integrator."""
+
 import numpy as np
 
 from simplemd.integrators.thermostats import apply_thermostat
 
 
 class VerletVelocityIntegrator:
+    """Velocity-Verlet integration for the point-particle (Lennard-Jones) model."""
+
     def __init__(self, parent, delta_t):
         self.system = parent
         self.delta_t = delta_t

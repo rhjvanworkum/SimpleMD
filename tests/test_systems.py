@@ -42,9 +42,7 @@ def test_tip4p_runs_and_is_finite():
 
 @pytest.mark.parametrize("integrator", ["leapfrog", "verlet"])
 def test_lj_runs_with_each_integrator(integrator):
-    traj = run_simulation(
-        system="LJ", integrator=integrator, forces="PBP", N=3, steps=10, seed=0
-    )
+    traj = run_simulation(system="LJ", integrator=integrator, forces="PBP", N=3, steps=10, seed=0)
     assert traj.shape[0] == 10
     assert np.isfinite(traj).all()
 

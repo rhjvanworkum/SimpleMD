@@ -13,6 +13,10 @@ from simplemd.utils import Mproduct, Qproduct, build_rot_matrix, lenSquared
 
 
 class Molecule:
+    """A rigid molecule with translational state (``r``/``rv``/``ra``) and
+    rotational state expressed as a quaternion (``q``/``qv``/``qa``), plus the
+    higher-order history buffers used by the predictor-corrector integrator."""
+
     def __init__(self, idx):
         self.idx = idx
         self.in_chain = -1
@@ -39,18 +43,23 @@ class Molecule:
 
 
 class Site:
+    """An interaction site in world coordinates: force ``f`` and position ``r``."""
+
     def __init__(self):
         self.f = np.zeros(3)
         self.r = np.zeros(3)
 
 
 class MSite:
+    """A site template in body coordinates: position ``r`` and force-type tag ``typeF``."""
+
     def __init__(self):
         self.r = np.zeros(3)
         self.typeF = 0
 
 
 def compute_ang_vel(mol):
+    """Return the molecule's angular velocity (3-vector) from its quaternion velocity."""
     qvt = mol.qv
     qvt[3] *= -1
     # qt is the quaternion containing the angular velocities
@@ -62,6 +71,7 @@ def compute_ang_vel(mol):
 
 
 def compute_accels_q(mol):
+    """Compute the quaternion acceleration ``mol.qa`` from the torque and inertia."""
     w = compute_ang_vel(mol)
     # w_dot_x = (torq_x + (I_y - I_z) * w_y * w_z) / I_X
     qs = np.array(
@@ -78,6 +88,7 @@ def compute_accels_q(mol):
 
 
 def compute_torq(mol, sites):
+    """Sum site forces into the molecule's acceleration and body-frame torque."""
     mol.ra = np.zeros(3)
     torq_sum = np.zeros(3)
     # for each site we calculate the accelaration and torque
