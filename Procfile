@@ -1,1 +1,1 @@
-web: gunicorn main:app
+web: gunicorn "simplemd.web:create_app()"

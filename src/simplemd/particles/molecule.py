@@ -8,10 +8,11 @@ Includes:
 """
 
 import numpy as np
-from utils import Qproduct, Mproduct, build_rot_matrix, lenSquared
+
+from simplemd.utils import Mproduct, Qproduct, build_rot_matrix, lenSquared
 
 
-class Molecule():
+class Molecule:
     def __init__(self, idx):
         self.idx = idx
         self.in_chain = -1
@@ -37,13 +38,13 @@ class Molecule():
         self.torq = np.zeros(3)
 
 
-class Site():
+class Site:
     def __init__(self):
         self.f = np.zeros(3)
         self.r = np.zeros(3)
 
 
-class MSite():
+class MSite:
     def __init__(self):
         self.r = np.zeros(3)
         self.typeF = 0
@@ -63,12 +64,14 @@ def compute_ang_vel(mol):
 def compute_accels_q(mol):
     w = compute_ang_vel(mol)
     # w_dot_x = (torq_x + (I_y - I_z) * w_y * w_z) / I_X
-    qs = np.array([
-    (mol.torq[0] + (mol.m_inert[1] - mol.m_inert[2]) * w[1] * w[2]) / mol.m_inert[0],
-    (mol.torq[1] + (mol.m_inert[2] - mol.m_inert[0]) * w[2] * w[0]) / mol.m_inert[1],
-    (mol.torq[2] + (mol.m_inert[0] - mol.m_inert[1]) * w[0] * w[1]) / mol.m_inert[2],
-    -2. * lenSquared(mol.qv)
-    ])
+    qs = np.array(
+        [
+            (mol.torq[0] + (mol.m_inert[1] - mol.m_inert[2]) * w[1] * w[2]) / mol.m_inert[0],
+            (mol.torq[1] + (mol.m_inert[2] - mol.m_inert[0]) * w[2] * w[0]) / mol.m_inert[1],
+            (mol.torq[2] + (mol.m_inert[0] - mol.m_inert[1]) * w[0] * w[1]) / mol.m_inert[2],
+            -2.0 * lenSquared(mol.qv),
+        ]
+    )
     # computing the quaternion accelerations
     # qa = 0.5 * W.T * (w_dot_x, w_dot_y, w_dot_z, -2 sum (q_dot_m^2))
     mol.qa = Qproduct(mol.q, qs) * 0.5

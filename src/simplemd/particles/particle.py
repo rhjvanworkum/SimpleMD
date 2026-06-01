@@ -4,8 +4,8 @@ Simple Particle Class used for the Lennard-Jones model
 
 import numpy as np
 
-class Particle():
 
+class Particle:
     def __init__(self, idx):
         self.idx = idx
 

@@ -1,6 +1,7 @@
 import numpy as np
-from integrators.thermostats import apply_thermostat, apply_thermostat_nonlinear
-from objects.Molecule import compute_torq, compute_accels_q
+
+from simplemd.integrators.thermostats import apply_thermostat, apply_thermostat_nonlinear
+from simplemd.particles.molecule import compute_accels_q, compute_torq
 
 
 def printer(mol):
@@ -8,10 +9,10 @@ def printer(mol):
     # for i in range(len(mol)):
     #     print(mol[i].r)
     #     print(mol[i].rv)
-    print('\n')
+    print("\n")
 
-class PredictorCorrectorIntegrator():
 
+class PredictorCorrectorIntegrator:
     def __init__(self, parent, delta_t):
         self.system = parent
         self.delta_t = delta_t
@@ -59,36 +60,70 @@ class PredictorCorrectorIntegrator():
         # Q corrector step
         corrector_stepQ(self.delta_t, self.system.n_mol, self.system.mol)
 
-        # make sure the periodic boundary conditions are applied as well as the quaternions nomralized
+        # apply periodic boundary conditions and renormalise the quaternions
         self.system.adjust_quat()
         self.system.apply_boundary_conditions()
+
 
 # wr = weight r = deltaT**2 / div, cr = coeffiecent r
 # wv = weight v = deltaT**2 / div, cv = coeffiecent v
 
+
 def pr4(mol, delta_t, wr, cr, t):
-    mol.r[t] = mol.r[t] + delta_t * mol.rv[t] + wr * (cr[0] * mol.ra[t] + cr[1] * mol.ra1[t] + cr[2] * mol.ra2[t])
+    mol.r[t] = (
+        mol.r[t]
+        + delta_t * mol.rv[t]
+        + wr * (cr[0] * mol.ra[t] + cr[1] * mol.ra1[t] + cr[2] * mol.ra2[t])
+    )
+
 
 def pv4(mol, delta_t, wv, cv, t):
-    mol.rv[t] = (mol.r[t] - mol.ro[t]) / delta_t + wv * (cv[0] * mol.ra[t] + cv[1] * mol.ra1[t] + cv[2] * mol.ra2[t])
+    mol.rv[t] = (mol.r[t] - mol.ro[t]) / delta_t + wv * (
+        cv[0] * mol.ra[t] + cv[1] * mol.ra1[t] + cv[2] * mol.ra2[t]
+    )
+
 
 def cr4(mol, delta_t, wr, cr, t):
-    mol.r[t] = mol.ro[t] + delta_t * mol.rvo[t] + wr * (cr[0] * mol.ra[t] + cr[1] * mol.ra1[t] + cr[2] * mol.ra2[t])
+    mol.r[t] = (
+        mol.ro[t]
+        + delta_t * mol.rvo[t]
+        + wr * (cr[0] * mol.ra[t] + cr[1] * mol.ra1[t] + cr[2] * mol.ra2[t])
+    )
+
 
 def cv4(mol, delta_t, wv, cv, t):
-    mol.rv[t] = (mol.r[t] - mol.ro[t]) / delta_t + wv * (cv[0] * mol.ra[t] + cv[1] * mol.ra1[t] + cv[2] * mol.ra2[t])
+    mol.rv[t] = (mol.r[t] - mol.ro[t]) / delta_t + wv * (
+        cv[0] * mol.ra[t] + cv[1] * mol.ra1[t] + cv[2] * mol.ra2[t]
+    )
+
 
 def prq4(mol, delta_t, wr, cr, t):
-    mol.q[t] = mol.q[t] + delta_t * mol.qv[t] + wr * (cr[0] * mol.qa[t] + cr[1] * mol.qa1[t] + cr[2] * mol.qa2[t])
+    mol.q[t] = (
+        mol.q[t]
+        + delta_t * mol.qv[t]
+        + wr * (cr[0] * mol.qa[t] + cr[1] * mol.qa1[t] + cr[2] * mol.qa2[t])
+    )
+
 
 def pvq4(mol, delta_t, wv, cv, t):
-    mol.qv[t] = (mol.q[t] - mol.qo[t]) / delta_t + wv * (cv[0] * mol.qa[t] + cv[1] * mol.qa1[t] + cv[2] * mol.qa2[t])
+    mol.qv[t] = (mol.q[t] - mol.qo[t]) / delta_t + wv * (
+        cv[0] * mol.qa[t] + cv[1] * mol.qa1[t] + cv[2] * mol.qa2[t]
+    )
+
 
 def crq4(mol, delta_t, wr, cr, t):
-    mol.q[t] = mol.qo[t] + delta_t * mol.qvo[t] + wr * (cr[0] * mol.qa[t] + cr[1] * mol.qa1[t] + cr[2] * mol.qa2[t])
+    mol.q[t] = (
+        mol.qo[t]
+        + delta_t * mol.qvo[t]
+        + wr * (cr[0] * mol.qa[t] + cr[1] * mol.qa1[t] + cr[2] * mol.qa2[t])
+    )
+
 
 def cvq4(mol, delta_t, wv, cv, t):
-    mol.qv[t] = (mol.q[t] - mol.qo[t]) / delta_t + wv * (cv[0] * mol.qa[t] + cv[1] * mol.qa1[t] + cv[2] * mol.qa2[t])
+    mol.qv[t] = (mol.q[t] - mol.qo[t]) / delta_t + wv * (
+        cv[0] * mol.qa[t] + cv[1] * mol.qa1[t] + cv[2] * mol.qa2[t]
+    )
+
 
 def predictor_step(delta_t, n_mol, mol):
     cr = np.array([19, -10, 3])
@@ -106,6 +141,7 @@ def predictor_step(delta_t, n_mol, mol):
         mol[n].ra2 = mol[n].ra1
         mol[n].ra1 = mol[n].ra
 
+
 def corrector_step(delta_t, n_mol, mol):
     cr = np.array([3, 10, -1])
     cv = np.array([7, 6, -1])
@@ -117,6 +153,7 @@ def corrector_step(delta_t, n_mol, mol):
         for t in range(len(mol[0].r)):
             cr4(mol[n], delta_t, wr, cr, t)
             cv4(mol[n], delta_t, wv, cv, t)
+
 
 def predictor_stepQ(delta_t, n_mol, mol):
     cr = np.array([19, -10, 3])
@@ -133,6 +170,7 @@ def predictor_stepQ(delta_t, n_mol, mol):
             pvq4(mol[n], delta_t, wv, cv, t)
         mol[n].qa2 = mol[n].qa1
         mol[n].qa1 = mol[n].qa
+
 
 def corrector_stepQ(delta_t, n_mol, mol):
     cr = np.array([3, 10, -1])

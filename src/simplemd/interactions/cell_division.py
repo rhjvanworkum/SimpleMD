@@ -1,17 +1,18 @@
 import numpy as np
-from utils import get_magnitude
+
 
 def wrap_around_cell(cell, cells, region, shift):
     for i in range(len(cells)):
-        if (cell[i] >= cells[i]):
+        if cell[i] >= cells[i]:
             cell[i] = 0
             shift[i] = region[i]
-        elif (cell[i] < 0):
+        elif cell[i] < 0:
             cell[i] = cells[i] - 1
-            shift[i] = - region[i]
+            shift[i] = -region[i]
+
 
 def ComputeForcesCD(system):
-    rr_cut = system.r_cut ** 2
+    rr_cut = system.r_cut**2
     # number of cells with length r_cut that fit inside region
     cells = np.floor(system.region / system.r_cut).astype(int)
 
@@ -23,9 +24,24 @@ def ComputeForcesCD(system):
                 cell_dict[(i, j, k)] = np.array([]).astype(int)
 
     # amount of cells we need to check for each cell
-    offsets = np.array([[0,0,0], [1,0,0], [1,1,0], [0,1,0], [-1,1,0], [0,0,1],
-                        [1,0,1], [1,1,1], [0,1,1], [-1,1,1], [-1,0,1],
-                        [-1,-1,1], [0,-1,1], [1,-1,1]])
+    offsets = np.array(
+        [
+            [0, 0, 0],
+            [1, 0, 0],
+            [1, 1, 0],
+            [0, 1, 0],
+            [-1, 1, 0],
+            [0, 0, 1],
+            [1, 0, 1],
+            [1, 1, 1],
+            [0, 1, 1],
+            [-1, 1, 1],
+            [-1, 0, 1],
+            [-1, -1, 1],
+            [0, -1, 1],
+            [1, -1, 1],
+        ]
+    )
 
     # inverse of the cell length
     inverse_length = 1 / system.r_cut
@@ -59,8 +75,7 @@ def ComputeForcesCD(system):
                             # perform calculation if cells are different or
                             # if cells are not different only when j2 is highter than j1
                             # this performs pair-wise checks in the same cell and not double
-                            if (not np.array_equal(cell1, cell2) or j > i):
-
+                            if not np.array_equal(cell1, cell2) or j > i:
                                 # calculate the distance now
                                 Rij = system.mol[i].r - system.mol[j].r
                                 Rij -= shift
@@ -68,11 +83,11 @@ def ComputeForcesCD(system):
                                 # calculating the magnitude of the distance vector
                                 rij = Rij[0] ** 2 + Rij[1] ** 2 + Rij[2] ** 2
 
-                                # we only calculate the force if the distance vector is smaller than the cut off distance
-                                if (rij < rr_cut):
+                                # only compute the force inside the cut-off radius
+                                if rij < rr_cut:
                                     # equation 1.1
                                     rij_3 = (1 / rij) ** 3
-                                    F_magnitude = 48 * (rij_3 ** 3 - 0.5 * rij_3 ** 2)
+                                    F_magnitude = 48 * (rij_3**3 - 0.5 * rij_3**2)
 
                                     # equation 1.2
                                     system.mol[i].ra += F_magnitude * Rij

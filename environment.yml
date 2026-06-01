@@ -1,7 +1,0 @@
-name: simpleMD
-dependencies:
-  - python=3.8
-  - pip:
-      - numpy
-      - flask
-      - pytest

@@ -4,13 +4,14 @@ TIP-4P water model
 
 import numpy as np
 
-from models.system import System
-import utils as utils
-import integrators.thermostats as thermostat
-from objects.Molecule import Molecule, Site, MSite
+from simplemd import utils
+from simplemd.integrators import thermostats as thermostat
+from simplemd.particles.molecule import Molecule, MSite, Site
+from simplemd.systems.base import System
 
 
 class TIP4P(System):
+    """Rigid four-site TIP-4P water model (rotational dynamics via quaternions)."""
 
     def __init__(self, settings, integrator, forces):
         System.__init__(self, settings, integrator, forces)
@@ -29,13 +30,12 @@ class TIP4P(System):
         self.init_ang_vels()
         self.gen_site_coords()
 
-
     def define_mol(self):
         self.molecule_sites[0].r[2] = -0.0206
         self.molecule_sites[1].r[2] = 0.0274
         self.molecule_sites[2].r[1] = 0.240
         self.molecule_sites[2].r[2] = 0.165
-        self.molecule_sites[3].r[1] = - self.molecule_sites[2].r[1]
+        self.molecule_sites[3].r[1] = -self.molecule_sites[2].r[1]
         self.molecule_sites[3].r[2] = self.molecule_sites[2].r[2]
 
         for n in range(self.n_mol):
@@ -49,18 +49,18 @@ class TIP4P(System):
         self.molecule_sites[2].typeF = 3
         self.molecule_sites[3].typeF = 3
 
-    """ rotating the molecular sites from body coordinates to world coordinates """
     def gen_site_coords(self):
+        """Rotate each molecule's body-frame sites into world coordinates."""
         for n in range(self.n_mol):
             rMat = utils.build_rot_matrix(self.mol[n].q, 1)
             for j in range(self.n_sites):
                 t = utils.Mproduct(rMat, self.molecule_sites[j].r)
                 self.sites[self.n_sites * n + j].r = self.mol[n].r + t
 
-    """ function that actually runs the simulation experiment """
     def simulate(self):
+        """Run the rigid-body integration loop until ``step_limit`` steps elapse."""
         running = True
-        while (running):
+        while running:
             self.step_count += 1
 
             self.integrator.integrate_nonlinear()
@@ -68,21 +68,23 @@ class TIP4P(System):
             self.eval_props()
             self.accum_props(1)
 
-            if (self.step_count % self.step_avg == 0):
+            if self.step_count % self.step_avg == 0:
                 self.accum_props(2)
-                if self.show_summary: self.print_summary()
+                if self.show_summary:
+                    self.print_summary()
                 self.accum_props(0)
 
-            if (self.step_count % self.step_adjust_temp == 0):
+            if self.step_count % self.step_adjust_temp == 0:
                 thermostat.adjust_temp_nonlin(self)
 
-            if (self.show_progress):
-                if (self.step_count % (self.step_limit / 1000) == 0):
-                    print('{:.1f}'.format(self.step_count / self.step_limit * 100) + '%')
+            if self.show_progress and self.step_count % (self.step_limit / 1000) == 0:
+                print(f"{self.step_count / self.step_limit * 100:.1f}" + "%")
 
-            if self.report: self.reporter.step()
+            if self.report:
+                self.reporter.step()
 
-            if (self.step_count >= self.step_limit):
+            if self.step_count >= self.step_limit:
                 # for the backend we just request this array in the API call
-                if self.report and self.reporter.output_file: self.reporter.export()
+                if self.report and self.reporter.output_file:
+                    self.reporter.export()
                 running = False

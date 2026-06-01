@@ -1,9 +1,8 @@
-from integrators.thermostats import apply_thermostat, apply_thermostat_nonlinear
+from simplemd.integrators.thermostats import apply_thermostat, apply_thermostat_nonlinear
+from simplemd.particles.molecule import compute_accels_q, compute_torq
 
-from objects.Molecule import compute_torq, compute_accels_q
 
-class LeapFrogIntegrator():
-
+class LeapFrogIntegrator:
     def __init__(self, parent, delta_t):
         self.system = parent
         self.delta_t = delta_t

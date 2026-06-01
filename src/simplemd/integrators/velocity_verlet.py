@@ -1,8 +1,9 @@
-from integrators.thermostats import apply_thermostat
 import numpy as np
 
-class VerletVelocityIntegrator():
+from simplemd.integrators.thermostats import apply_thermostat
 
+
+class VerletVelocityIntegrator:
     def __init__(self, parent, delta_t):
         self.system = parent
         self.delta_t = delta_t
@@ -10,7 +11,9 @@ class VerletVelocityIntegrator():
     def integrate(self):
         # calc new positions
         for i in range(self.system.n_mol):
-            self.system.mol[i].r += self.delta_t * self.system.mol[i].rv + 0.5 * self.delta_t * self.system.mol[i].ra
+            self.system.mol[i].r += (
+                self.delta_t * self.system.mol[i].rv + 0.5 * self.delta_t * self.system.mol[i].ra
+            )
 
         # make sure the periodic boundary conditions are applied
         self.system.apply_boundary_conditions()

@@ -1,18 +1,30 @@
-import numpy as np
 import json
+
+import numpy as np
 
 
 class Reporter:
-
     def __init__(self, parent, step_report_avg, model, output_file=None):
         self.system = parent
         self.step_report_avg = step_report_avg
         self.model = model
 
-        if (model == "LJ"):
-            self.traj = np.zeros((int(self.system.step_limit / step_report_avg), self.system.n_mol, self.system.n_dim))
-        elif (model == "TIP4P"):
-            self.traj = np.zeros((int(self.system.step_limit / step_report_avg), self.system.n_mol * 3, self.system.n_dim))
+        if model == "LJ":
+            self.traj = np.zeros(
+                (
+                    int(self.system.step_limit / step_report_avg),
+                    self.system.n_mol,
+                    self.system.n_dim,
+                )
+            )
+        elif model == "TIP4P":
+            self.traj = np.zeros(
+                (
+                    int(self.system.step_limit / step_report_avg),
+                    self.system.n_mol * 3,
+                    self.system.n_dim,
+                )
+            )
 
         self.i = 0
 
@@ -20,9 +32,9 @@ class Reporter:
 
     def step(self):
         if self.system.step_count % self.step_report_avg == 0:
-            if (self.model == "LJ"):
+            if self.model == "LJ":
                 self.report()
-            elif (self.model == "TIP4P"):
+            elif self.model == "TIP4P":
                 self.report_water()
 
             self.i += 1
@@ -40,5 +52,5 @@ class Reporter:
                     i += 1
 
     def export(self):
-        with open(self.output_file, 'w') as f:
+        with open(self.output_file, "w") as f:
             json.dump(self.traj.tolist(), f)
