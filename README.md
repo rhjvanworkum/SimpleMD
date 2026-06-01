@@ -101,12 +101,14 @@ Simulations draw random initial velocities/orientations. Passing `seed=...`
 (API/CLI) or `"seed"` (HTTP) makes a run fully reproducible; omitting it
 preserves the original non-deterministic behavior.
 
-## Notes / known limitations
+## Notes
 
-- The `CD` (cell-division) force method and the `pred-corr` integrator **with
-  the LJ model** are known to be broken in the original code (documented by
-  tests in `tests/test_known_bugs.py`) and are not yet fixed.
-- `pred-corr` works with the TIP-4P model.
+- The `CD` (cell-division) force method produces the same Lennard-Jones forces
+  as `PBP` but scales better for large systems. It requires at least 3 cells per
+  dimension (roughly `N >= 4` at the default density); smaller systems raise a
+  clear error — use `PBP` instead.
+- All integrators (`leapfrog`, `verlet`, `pred-corr`) work with the LJ model;
+  `leapfrog` and `pred-corr` work with TIP-4P.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow.
 

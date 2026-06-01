@@ -1,12 +1,11 @@
 """Cell-division (cell-list) force evaluation.
 
-Bins particles into a grid of cells of side ~``r_cut`` so that only neighbouring
-cells need to be checked, in principle giving O(N) scaling.
+Bins particles into a grid of cells of side >= ``r_cut`` so that only
+neighbouring cells need to be checked, giving O(N) scaling. Produces the same
+Lennard-Jones forces as the pair-by-pair method, but faster for large systems.
 
-.. warning::
-   This routine has a pre-existing cell-indexing bug (edge particles map to an
-   out-of-range cell) and currently raises ``KeyError``. See
-   ``tests/test_known_bugs.py``. It is kept for reference / future fixing.
+The cell-list half-shell stencil requires at least 3 cells per dimension; for
+smaller systems use the ``PBP`` method instead.
 """
 
 import numpy as np
@@ -24,10 +23,20 @@ def wrap_around_cell(cell, cells, region, shift):
 
 
 def ComputeForcesCD(system):
-    """Lennard-Jones forces via a cell list (see module-level warning)."""
+    """Lennard-Jones forces via a cell list. Equivalent to ``ComputeForcesPBP``.
+
+    Raises:
+        ValueError: if the system is too small for a valid cell list
+            (fewer than 3 cells in any dimension).
+    """
     rr_cut = system.r_cut**2
-    # number of cells with length r_cut that fit inside region
+    # number of cells of side >= r_cut that tile the region in each dimension
     cells = np.floor(system.region / system.r_cut).astype(int)
+    if np.any(cells < 3):
+        raise ValueError(
+            "cell-division requires at least 3 cells per dimension "
+            f"(got {cells.tolist()}); increase N/density or use the 'PBP' method"
+        )
 
     # initializing a dictionary that contains all particles index inside each cell
     cell_dict = {}
@@ -56,19 +65,27 @@ def ComputeForcesCD(system):
         ]
     )
 
-    # inverse of the cell length
-    inverse_length = 1 / system.r_cut
+    # Inverse cell length per dimension. Using region/cells (not r_cut) makes the
+    # cells tile the region exactly, so floor(position * inverse_length) is always
+    # in range [0, cells) -- this is the fix for the previous out-of-range KeyError.
+    inverse_length = cells / system.region
 
     # assigning the particles to the different cells
     for i in range(system.n_mol):
         position = system.mol[i].r + 0.5 * system.region
         cell_position = position * inverse_length
-        index = (np.floor(cell_position[0]), np.floor(cell_position[1]), np.floor(cell_position[2]))
+        index = (
+            int(np.floor(cell_position[0])),
+            int(np.floor(cell_position[1])),
+            int(np.floor(cell_position[2])),
+        )
         cell_dict[index] = np.append(cell_dict[index], i)
 
-    # setting the acceleration to zero
+    # setting the acceleration to zero and resetting the energy/virial accumulators
     for mol in system.mol:
         mol.ra = np.zeros(3)
+    system.u_sum = 0
+    system.vir_sum = 0
 
     # iterating over the cells first
     for cx in range(cells[0]):
@@ -105,3 +122,8 @@ def ComputeForcesCD(system):
                                     # equation 1.2
                                     system.mol[i].ra += F_magnitude * Rij
                                     system.mol[j].ra += -F_magnitude * Rij
+
+                                    # accumulate potential energy and virial
+                                    # (same definitions as the pair-by-pair method)
+                                    system.u_sum += 4 * rij_3 * (rij_3 - 1) + 1
+                                    system.vir_sum += F_magnitude * rij
