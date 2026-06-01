@@ -1,3 +1,8 @@
-import sys
-sys.path.insert(0, "/var/www/html/simpleMD")
-from main import app as application
+"""WSGI entry point for production servers (gunicorn / mod_wsgi).
+
+Requires the package to be installed (``pip install .`` or ``uv sync``).
+"""
+
+from simplemd.web import app as application
+
+__all__ = ["application"]
