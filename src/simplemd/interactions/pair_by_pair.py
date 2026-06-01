@@ -96,10 +96,8 @@ def ComputeForcesPBP_nonlinear(system):
                                 u_val = system.b * np.sqrt(rri)
                                 fc_val = u_val * rri
 
+                            # Newton's third law: the partner site receives the
+                            # equal-and-opposite force (dir = r_i - r_j points from j to i).
                             system.sites[i_s + k].f += fc_val * dir
-                            # NOTE: original code adds the same sign to both sites.
-                            # This looks like a Newton's-third-law sign bug (the partner
-                            # site should get the opposite force), but it is left as-is to
-                            # preserve behavior — flagged for separate review.
-                            system.sites[j_s + l].f += fc_val * dir
+                            system.sites[j_s + l].f += -fc_val * dir
                             system.u_sum += u_val

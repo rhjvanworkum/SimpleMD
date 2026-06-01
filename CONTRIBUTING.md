@@ -38,9 +38,10 @@ All four must pass before a PR is merged; CI runs them on every push and PR.
   over time.
 - Keep new dependencies minimal — prefer the standard library and NumPy.
 
-## Known issues worth fixing
+## Physics regression tests
 
-`tests/test_known_bugs.py` pins two pre-existing bugs (the cell-division force
-and the predictor-corrector integrator for the LJ model). Fixing either is a
-welcome, self-contained contribution — update or remove the corresponding test
-when you do.
+`tests/test_bugfixes.py` guards three behaviors that were previously broken and
+have since been fixed: cell-division force evaluation (must match the
+pair-by-pair reference), the predictor-corrector integrator for the LJ model,
+and Newton's third law in the TIP-4P site forces. Keep these green when touching
+the force or integrator code.
